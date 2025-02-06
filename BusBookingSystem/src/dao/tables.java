@@ -1,13 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dao;
 import javax.swing.JOptionPane;
-/**
- *
- * @author pangt
- */
 
 public class tables {
     public static void main(String[] args) {
@@ -27,6 +19,7 @@ public class tables {
                 + "source VARCHAR(100) NOT NULL, "
                 + "destination VARCHAR(100) NOT NULL, "
                 + "departureTime TIMESTAMP NOT NULL, "
+                + "arrivalTime TIMESTAMP NOT NULL, "  // Add this line
                 + "totalSeats INT NOT NULL, "
                 + "ticketPrice DECIMAL(10,2) NOT NULL)";
             DbOperations.setDataOrDelete(busTable, "Buses table created successfully");
