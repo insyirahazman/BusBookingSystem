@@ -18,12 +18,12 @@ public class tables {
                 + "busID VARCHAR(10) PRIMARY KEY, "
                 + "source VARCHAR(100) NOT NULL, "
                 + "destination VARCHAR(100) NOT NULL, "
+                + "departureDate DATE NOT NULL, "  // Add departureDate
                 + "departureTime TIMESTAMP NOT NULL, "
-                + "arrivalTime TIMESTAMP NOT NULL, "  // Add this line
                 + "totalSeats INT NOT NULL, "
                 + "ticketPrice DECIMAL(10,2) NOT NULL)";
             DbOperations.setDataOrDelete(busTable, "Buses table created successfully");
-
+            
             // Create booking table with foreign keys
             String bookingTable = "CREATE TABLE IF NOT EXISTS booking ("
                 + "bookingID VARCHAR(50) PRIMARY KEY, "

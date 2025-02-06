@@ -81,75 +81,76 @@ public class AdminBus extends JInternalFrame {
     }
 }
 
-class ViewBusesInternalFrame extends JInternalFrame {
-    private JTable table;
-
-    public ViewBusesInternalFrame() {
-        super("View All Buses", true, true, true, true);
-        initComponents();
-        setSize(800, 600);
-        setVisible(true);
-    }
-
-    private void initComponents() {
-        JScrollPane scrollPane = new JScrollPane();
-        table = new JTable();
-        setupTable();
-        loadBusData();
-        scrollPane.setViewportView(table);
-        getContentPane().add(scrollPane, BorderLayout.CENTER);
-    }
-
-    private void setupTable() {
-        String[] columns = {"Bus ID", "Source", "Destination", "Departure Time", "Arrival Time", "Total Seats", "Price"};
-        DefaultTableModel model = new DefaultTableModel(columns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
+ class ViewBusesInternalFrame extends JInternalFrame {
+        private JTable table;
+        
+        public ViewBusesInternalFrame() {
+            super("View All Buses", true, true, true, true);
+            initComponents();
+            setSize(800, 600);
+            setVisible(true);
+        }
+        
+        private void initComponents() {
+            JScrollPane scrollPane = new JScrollPane();
+            table = new JTable();
+            setupTable();
+            loadBusData();
+            scrollPane.setViewportView(table);
+            getContentPane().add(scrollPane, BorderLayout.CENTER);
+        }
+        
+        private void setupTable() {
+            String[] columns = {"Bus ID", "Source", "Destination", "Departure Time", 
+                              "Total Seats", "Price"};
+            DefaultTableModel model = new DefaultTableModel(columns, 0) {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+            table.setModel(model);
+        }
+        
+        private void loadBusData() {
+            DefaultTableModel model = (DefaultTableModel) table.getModel();
+            model.setRowCount(0);
+            
+            try (Connection conn = ConnectionProvider.getCon();
+                 Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT * FROM buses")) {
+                
+                while (rs.next()) {
+                    Object[] row = {
+                        rs.getString("busID"),
+                        rs.getString("source"),
+                        rs.getString("destination"),
+                        rs.getTimestamp("departureTime"),
+                        rs.getInt("totalSeats"),
+                        rs.getDouble("ticketPrice")
+                    };
+                    model.addRow(row);
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error loading buses: " + ex.getMessage());
             }
-        };
-        table.setModel(model);
-    }
-
-    private void loadBusData() {
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        model.setRowCount(0);
-
-        try (Connection conn = ConnectionProvider.getCon();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM buses")) {
-
-            while (rs.next()) {
-                Object[] row = {
-                    rs.getString("busID"),
-                    rs.getString("source"),
-                    rs.getString("destination"),
-                    rs.getTimestamp("departureTime"),
-                    rs.getTimestamp("arrivalTime"),  // Add this line
-                    rs.getInt("totalSeats"),
-                    rs.getDouble("ticketPrice")
-                };
-                model.addRow(row);
-            }
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error loading buses: " + ex.getMessage());
         }
     }
-}
 
 
 class AddBusInternalFrame extends JInternalFrame {
-    private JTextField busIdField, sourceField, destField, departureTimeField, arrivalTimeField, seatsField, priceField;
+    private JTextField busIdField, sourceField, destField, seatsField, priceField, departureTimeField;
+    private JDateChooser dateChooser;
 
     public AddBusInternalFrame() {
         super("Add New Bus", true, true, true, true);
         initComponents();
-        setSize(400, 350);  // Adjust size to accommodate new field
+        setSize(400, 350);
         setVisible(true);
     }
 
     private void initComponents() {
-        setLayout(new GridLayout(8, 2, 5, 5));  // Adjust grid layout
+        setLayout(new GridLayout(8, 2, 5, 5));
 
         add(new JLabel("Bus ID:"));
         busIdField = new JTextField();
@@ -163,13 +164,13 @@ class AddBusInternalFrame extends JInternalFrame {
         destField = new JTextField();
         add(destField);
 
-        add(new JLabel("Departure Time (yyyy-MM-dd HH:mm):"));
+        add(new JLabel("Departure Date:"));
+        dateChooser = new JDateChooser();
+        add(dateChooser);
+
+        add(new JLabel("Departure Time (HH:mm):"));
         departureTimeField = new JTextField();
         add(departureTimeField);
-
-        add(new JLabel("Arrival Time (yyyy-MM-dd HH:mm):"));  // New field
-        arrivalTimeField = new JTextField();
-        add(arrivalTimeField);
 
         add(new JLabel("Total Seats:"));
         seatsField = new JTextField();
@@ -189,8 +190,8 @@ class AddBusInternalFrame extends JInternalFrame {
             if (busIdField.getText().trim().isEmpty() || 
                 sourceField.getText().trim().isEmpty() || 
                 destField.getText().trim().isEmpty() || 
+                dateChooser.getDate() == null || 
                 departureTimeField.getText().trim().isEmpty() || 
-                arrivalTimeField.getText().trim().isEmpty() ||  // Check new field
                 seatsField.getText().trim().isEmpty() || 
                 priceField.getText().trim().isEmpty()) {
 
@@ -199,46 +200,31 @@ class AddBusInternalFrame extends JInternalFrame {
             }
 
             Connection conn = ConnectionProvider.getCon();
-            String sql = "INSERT INTO buses (busID, source, destination, departureTime, arrivalTime, totalSeats, ticketPrice) VALUES (?, ?, ?, ?, ?, ?, ?)";  // Update query
+            String sql = "INSERT INTO buses (busID, source, destination, departureDate, departureTime, totalSeats, ticketPrice) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             try (PreparedStatement pst = conn.prepareStatement(sql)) {
-                int totalSeats = Integer.parseInt(seatsField.getText());
                 pst.setString(1, busIdField.getText().trim());
                 pst.setString(2, sourceField.getText().trim());
                 pst.setString(3, destField.getText().trim());
+                
+                // Format and set the departure date
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String departureDate = dateFormat.format(dateChooser.getDate());
+                pst.setDate(4, java.sql.Date.valueOf(departureDate));
 
-                try {
-                    LocalDateTime departureTime = LocalDateTime.parse(departureTimeField.getText().trim(), 
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-                    pst.setTimestamp(4, Timestamp.valueOf(departureTime));
+                // Format and set the departure time
+                String departureDateTime = departureDate + " " + departureTimeField.getText().trim() + ":00";
+                pst.setTimestamp(5, Timestamp.valueOf(departureDateTime));
 
-                    LocalDateTime arrivalTime = LocalDateTime.parse(arrivalTimeField.getText().trim(),  // Parse new field
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-                    pst.setTimestamp(5, Timestamp.valueOf(arrivalTime));  // Set new field
-                } catch (Exception e) {
-                    JOptionPane.showMessageDialog(this, "Invalid date format! Use yyyy-MM-dd HH:mm");
-                    return;
-                }
-
-                pst.setInt(6, totalSeats);
+                pst.setInt(6, Integer.parseInt(seatsField.getText().trim()));
                 pst.setDouble(7, Double.parseDouble(priceField.getText().trim()));
 
-                int result = pst.executeUpdate();
-                if (result > 0) {
-                    JOptionPane.showMessageDialog(this, "Bus added successfully!");
-                    dispose();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Failed to add bus. No rows affected.");
-                }
+                pst.executeUpdate();
+                JOptionPane.showMessageDialog(this, "Bus added successfully!");
+                dispose();
             }
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage());
-            ex.printStackTrace();
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Invalid number format in seats or price field!");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
-            ex.printStackTrace();
+        } catch (SQLException | NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Error adding bus: " + ex.getMessage());
         }
     }
 }
