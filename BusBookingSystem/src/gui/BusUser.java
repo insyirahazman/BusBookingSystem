@@ -1,25 +1,25 @@
 package gui;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 
 public class BusUser {
-    private String busID;
-    private String source;
-    private String destination;
-    private LocalDate departureDate;  // Change to LocalDate
-    private LocalDateTime departureTime;
-    private int totalSeats;
-    private double ticketPrice;
-    private Set<Integer> bookedSeats = new HashSet<>();
+    private final String busID;
+    private final String source;
+    private final String destination;
+    private final LocalDate departureDate;
+    private final LocalTime departureTime;
+    private final int totalSeats;
+    private final double ticketPrice;
+    private final Set<Integer> bookedSeats = new HashSet<>();
 
-    public BusUser(String busID, String source, String destination, LocalDate departureDate, LocalDateTime departureTime, int totalSeats, double ticketPrice) {
+    public BusUser(String busID, String source, String destination, LocalDate departureDate, LocalTime departureTime, int totalSeats, double ticketPrice) {
         this.busID = busID;
         this.source = source;
         this.destination = destination;
-        this.departureDate = departureDate;  // Initialize this field
+        this.departureDate = departureDate;
         this.departureTime = departureTime;
         this.totalSeats = totalSeats;
         this.ticketPrice = ticketPrice;
@@ -30,7 +30,7 @@ public class BusUser {
     }
 
     public String getBusInfo() {
-        return String.format("%s - %s | Departure Date: %s | Departure Time: %s | RM%.2f", source, destination, departureDate, departureTime, ticketPrice);
+        return String.format("%s - %s | Seats Available: %d | Departure Date: %s | Departure Time: %s | RM%.2f", source, destination, totalSeats, departureDate, departureTime, ticketPrice);
     }
 
     public int getTotalSeats() {

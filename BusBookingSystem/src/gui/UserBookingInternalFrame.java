@@ -1,18 +1,18 @@
 package gui;
 
+import com.toedter.calendar.JDateChooser;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.sql.*;
-import java.time.LocalDateTime;
+import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-// import java.util.HashSet;
-// import java.util.Set;
 
 public class UserBookingInternalFrame extends JInternalFrame {
     private final int userID;
-    private JTextField dateField;
+    private JDateChooser dateChooser;
     private DefaultListModel<String> busListModel;
     private JList<String> busListUI;
     private List<BusUser> buses = new ArrayList<>();
@@ -29,10 +29,9 @@ public class UserBookingInternalFrame extends JInternalFrame {
                 setLocation(
                     (getParent().getWidth() - getWidth()) / 2,
                     (getParent().getHeight() - getHeight()) / 2
-        );
-    }
-});
-
+                );
+            }
+        });
     }
 
     private void initComponents() {
@@ -40,9 +39,10 @@ public class UserBookingInternalFrame extends JInternalFrame {
 
         // Date panel
         JPanel datePanel = new JPanel(new FlowLayout());
-        datePanel.add(new JLabel("Select Date (yyyy-MM-dd):"));
-        dateField = new JTextField(10);
-        datePanel.add(dateField);
+        datePanel.add(new JLabel("Select Date:"));
+        dateChooser = new JDateChooser();
+        dateChooser.setDateFormatString("yyyy-MM-dd");
+        datePanel.add(dateChooser);
         JButton searchButton = new JButton("Search");
         searchButton.addActionListener(e -> searchBuses());
         datePanel.add(searchButton);
@@ -72,11 +72,12 @@ public class UserBookingInternalFrame extends JInternalFrame {
     }
 
     private void searchBuses() {
-        String date = dateField.getText().trim();
-        if (date.isEmpty()){
-            JOptionPane.showMessageDialog(this, "Please enter a date!", "Error", JOptionPane.ERROR_MESSAGE);
+        if (dateChooser.getDate() == null) {
+            JOptionPane.showMessageDialog(this, "Please select a date!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String date = dateFormat.format(dateChooser.getDate());
         buses = loadBusesFromDatabase(date);
         updateBusList();
     }
@@ -84,7 +85,7 @@ public class UserBookingInternalFrame extends JInternalFrame {
     private List<BusUser> loadBusesFromDatabase(String date) {
         List<BusUser> buses = new ArrayList<>();
         try (Connection con = ConnectionProvider.getCon();
-             PreparedStatement ps = con.prepareStatement("SELECT * FROM buses WHERE DATE(departureTime) = ?")) {
+             PreparedStatement ps = con.prepareStatement("SELECT * FROM buses WHERE DATE(departureDate) = ?")) {
             
             ps.setString(1, date);
             try (ResultSet rs = ps.executeQuery()) {
@@ -93,7 +94,8 @@ public class UserBookingInternalFrame extends JInternalFrame {
                         rs.getString("busID"),
                         rs.getString("source"),
                         rs.getString("destination"),
-                        rs.getTimestamp("departureTime").toLocalDateTime(),
+                        rs.getDate("departureDate").toLocalDate(),
+                        rs.getTime("departureTime").toLocalTime(),
                         rs.getInt("totalSeats"),
                         rs.getDouble("ticketPrice")
                     );
@@ -128,7 +130,7 @@ public class UserBookingInternalFrame extends JInternalFrame {
     }
 
     private void showSeatDialog(BusUser bus) {
-        JDialog seatDialog = new JDialog((Frame)SwingUtilities.getWindowAncestor(this), 
+        JDialog seatDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), 
             "Seat Selection - " + bus.getBusID(), true);
         seatDialog.setLayout(new GridBagLayout());
         
@@ -202,7 +204,4 @@ public class UserBookingInternalFrame extends JInternalFrame {
             return false;
         }
     }
-
 }
-
-

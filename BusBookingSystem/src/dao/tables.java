@@ -1,5 +1,7 @@
 package dao;
 import javax.swing.JOptionPane;
+import java.sql.Connection;
+import java.sql.Statement;
 
 public class tables {
     public static void main(String[] args) {
@@ -23,7 +25,14 @@ public class tables {
                 + "totalSeats INT NOT NULL, "
                 + "ticketPrice DECIMAL(10,2) NOT NULL)";
             DbOperations.setDataOrDelete(busTable, "Buses table created successfully");
-            
+
+            // Alter buses table to add departureDate if it does not exist
+            try (Connection con = ConnectionProvider.getCon();
+                 Statement stmt = con.createStatement()) {
+                String alterTable = "ALTER TABLE buses ADD COLUMN IF NOT EXISTS departureDate DATE";
+                stmt.execute(alterTable);
+            }
+
             // Create booking table with foreign keys
             String bookingTable = "CREATE TABLE IF NOT EXISTS booking ("
                 + "bookingID VARCHAR(50) PRIMARY KEY, "

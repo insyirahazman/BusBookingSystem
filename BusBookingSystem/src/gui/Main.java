@@ -6,8 +6,8 @@ import java.awt.*;
 
 
 public class Main {
-    private JFrame frame;
-    private JPanel panel;
+    private final JFrame frame;
+    private final JPanel panel;
     
     public Main() {
         tables.main(new String[]{});
