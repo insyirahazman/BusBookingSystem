@@ -25,6 +25,15 @@ This is a Java-based Bus Booking System application. It allows users to book bus
 - jBCrypt library (`jbcrypt-0.4.jar`)
 
 ## How to Run
+### Database Setup
+
+You can quickly set up your database and sample data by running the provided sample_db.sql file in phpMyAdmin, DBeaver, or any MySQL client.
+
+1. Open your MySQL management tool.
+2. Run the script BusBookingSystem/BusBookingSystem/sample_db.sql to create tables and insert sample data.
+3. If you only want to insert sample data (without creating tables), run `BusBookingSystem/BusBookingSystem/sample_data.sql` after your tables are created.
+4. Update your connection details in `ConnectionProvider.java` if needed.
+
 ### Using NetBeans
 
 1. Clone the repository.
@@ -32,6 +41,7 @@ This is a Java-based Bus Booking System application. It allows users to book bus
 3. Ensure the required libraries (`jcalendar-1.4.jar`, `mysql-connector-j-9.2.0.jar`, `jbcrypt-0.4.jar`) are added to the project libraries.
 4. Set up the MySQL database and update connection details in `ConnectionProvider.java`.
 5. Build and run the project directly from NetBeans (`Run > Run Project`).
+
 
 ### Using Ant or Other IDEs
 
