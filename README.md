@@ -49,7 +49,10 @@ This is a Java-based Bus Booking System application. It allows users to book bus
    ```powershell
    javac -cp "BusBookingSystem/lib/*" -d BusBookingSystem/build BusBookingSystem/src/dao/*.java BusBookingSystem/src/gui/*.java
    ```
-5. Run the application: java -cp "BusBookingSystem/build;BusBookingSystem/lib/*" gui.Main
+5. Run the application: 
+    ```powershell
+    java -cp "BusBookingSystem/build;BusBookingSystem/lib/*" gui.Main
+    ```
 
 ## License
 This project is for educational purposes.
