@@ -1,48 +1,53 @@
 -- Database creation script for Bus Booking System
 
 CREATE TABLE users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  username VARCHAR(50) NOT NULL,
-  password VARCHAR(100) NOT NULL,
-  role VARCHAR(10) NOT NULL
+  userID INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(100) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  email VARCHAR(100),
+  userType ENUM('ADMIN','USER')
 );
 
 CREATE TABLE buses (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  bus_number VARCHAR(20) NOT NULL,
-  source VARCHAR(50),
-  destination VARCHAR(50),
-  seats INT
+  busID VARCHAR(10) PRIMARY KEY,
+  source VARCHAR(100),
+  destination VARCHAR(100),
+  departureDate DATE,
+  departureTime TIMESTAMP,
+  totalSeats INT,
+  ticketPrice DECIMAL(10,2)
 );
 
-CREATE TABLE bookings (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT,
-  bus_id INT,
-  booking_date DATE,
-  seat_number INT,
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (bus_id) REFERENCES buses(id)
+CREATE TABLE booking (
+  bookingID VARCHAR(50) PRIMARY KEY,
+  busID VARCHAR(50),
+  userID INT,
+  seatNumber INT,
+  customerName VARCHAR(100),
+  ticketPrice DECIMAL(10,2),
+  bookingDateTime TIMESTAMP,
+  STATUS ENUM('CONFIRMED','CANCELLED','PENDING'),
+  FOREIGN KEY (userID) REFERENCES users(userID),
+  FOREIGN KEY (busID) REFERENCES buses(busID)
 );
 
 -- Sample data for Bus Booking System
 
-INSERT INTO users (username, password, role) VALUES
-('admin1', 'adminpass1', 'admin'),
-('admin2', 'adminpass2', 'admin'),
-('user1', 'userpass1', 'user'),
-('user2', 'userpass2', 'user'),
-('user3', 'userpass3', 'user');
+INSERT INTO users (userID, username, password, email, userType) VALUES
+(1, 'admin1', 'adminpass1', 'admin1@email.com', 'ADMIN'),
+(2, 'admin2', 'adminpass2', 'admin2@email.com', 'ADMIN'),
+(3, 'user1', 'userpass1', 'user1@email.com', 'USER'),
+(4, 'user2', 'userpass2', 'user2@email.com', 'USER'),
+(5, 'user3', 'userpass3', 'user3@email.com', 'USER');
 
-INSERT INTO buses (bus_number, source, destination, seats) VALUES
-('BUS100', 'Kuala Lumpur', 'Penang', 40),
-('BUS101', 'Johor Bahru', 'Kuala Lumpur', 35),
-('BUS102', 'Ipoh', 'Melaka', 30),
-('BUS103', 'Kuantan', 'Kuala Lumpur', 45);
+INSERT INTO buses (busID, source, destination, departureDate, departureTime, totalSeats, ticketPrice) VALUES
+('BUS100', 'Kuala Lumpur', 'Penang', '2025-09-10', '2025-09-10 08:00:00', 40, 45.00),
+('BUS101', 'Johor Bahru', 'Kuala Lumpur', '2025-09-11', '2025-09-11 09:30:00', 35, 55.00),
+('BUS102', 'Ipoh', 'Melaka', '2025-09-12', '2025-09-12 07:45:00', 30, 40.00);
 
-INSERT INTO bookings (user_id, bus_id, booking_date, seat_number) VALUES
-(3, 1, '2025-09-05', 12),
-(4, 2, '2025-09-06', 7),
-(5, 3, '2025-09-07', 18),
-(3, 4, '2025-09-08', 22),
-(4, 1, '2025-09-09', 5);
+INSERT INTO booking (bookingID, busID, userID, seatNumber, customerName, ticketPrice, bookingDateTime, STATUS) VALUES
+('BK001', 'BUS100', 3, 12, 'user1', 45.00, '2025-09-02 10:00:00', 'CONFIRMED'),
+('BK002', 'BUS101', 4, 7, 'user2', 55.00, '2025-09-02 11:30:00', 'CONFIRMED'),
+('BK003', 'BUS102', 5, 18, 'user3', 40.00, '2025-09-02 09:00:00', 'PENDING'),
+('BK004', 'BUS100', 4, 22, 'user2', 45.00, '2025-09-02 12:00:00', 'CANCELLED'),
+('BK005', 'BUS101', 3, 5, 'user1', 55.00, '2025-09-02 13:00:00', 'CONFIRMED');

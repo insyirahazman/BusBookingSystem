@@ -30,7 +30,7 @@ This is a Java-based Bus Booking System application. It allows users to book bus
 You can quickly set up your database and sample data by running the provided sample_db.sql file in phpMyAdmin, DBeaver, or any MySQL client.
 
 1. Open your MySQL management tool.
-2. Run the script BusBookingSystem/BusBookingSystem/sample_db.sql to create tables and insert sample data.
+2. Run the script BusBookingSystem/BusBookingSystem/busbooking_db.sql to create tables and insert sample data.
 3. If you only want to insert sample data (without creating tables), run `BusBookingSystem/BusBookingSystem/sample_data.sql` after your tables are created.
 4. Update your connection details in `ConnectionProvider.java` if needed.
 

@@ -170,7 +170,7 @@ public class UserBookingInternalFrame extends JInternalFrame {
     private List<Integer> getBookedSeats(String busID) {
         List<Integer> bookedSeats = new ArrayList<>();
         try (Connection con = ConnectionProvider.getCon();
-             PreparedStatement ps = con.prepareStatement("SELECT seatNumber FROM bookings WHERE busID = ?")) {
+             PreparedStatement ps = con.prepareStatement("SELECT seatNumber FROM booking WHERE busID = ?")) {
             
             ps.setString(1, busID);
             try (ResultSet rs = ps.executeQuery()) {
@@ -189,11 +189,17 @@ public class UserBookingInternalFrame extends JInternalFrame {
     
     private boolean bookSelectedSeat(BusUser bus, int seatNumber) {
         try (Connection con = ConnectionProvider.getCon();
-             PreparedStatement ps = con.prepareStatement("INSERT INTO bookings (busID, seatNumber, userID) VALUES (?, ?, ?)")) {
-            
-            ps.setString(1, bus.getBusID());
-            ps.setInt(2, seatNumber);
-            ps.setInt(3, this.userID); 
+             PreparedStatement ps = con.prepareStatement(
+                "INSERT INTO booking (bookingID, busID, userID, seatNumber, customerName, ticketPrice, bookingDateTime, STATUS) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
+
+            ps.setString(1, generateBookingID());
+            ps.setString(2, bus.getBusID());
+            ps.setInt(3, this.userID);
+            ps.setInt(4, seatNumber);
+            ps.setString(5, getCustomerName());
+            ps.setDouble(6, bus.getTicketPrice());
+            ps.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            ps.setString(8, "CONFIRMED");
 
             ps.executeUpdate();
             JOptionPane.showMessageDialog(this, "Seat " + seatNumber + " booked successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -202,6 +208,24 @@ public class UserBookingInternalFrame extends JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Booking failed: " + e.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
             return false;
+        }
+    }
+
+    // Helper method to generate a unique bookingID
+    private String generateBookingID() {
+        return "BK" + System.currentTimeMillis();
+    }
+
+    // Helper method to get customer name (for demo, use username from userID)
+    private String getCustomerName() {
+        // In a real app, fetch username from users table using userID
+        switch (userID) {
+            case 1: return "admin1";
+            case 2: return "admin2";
+            case 3: return "user1";
+            case 4: return "user2";
+            case 5: return "user3";
+            default: return "user" + userID;
         }
     }
 }
